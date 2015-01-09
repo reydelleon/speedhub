@@ -1,0 +1,75 @@
+<!doctype html>
+<html ng-app="popup" ng-csp>
+<head>
+  <meta charset="utf-8">
+  <!-- build:css styles/vendor.css -->
+  <!-- bower:css -->
+  <!-- endbower -->
+  <!-- endbuild -->
+  <!-- build:css styles/main.css -->
+  <link href="styles/normalize.min.css" rel="stylesheet">
+  <link href="styles/main.css" rel="stylesheet">
+  <!-- endbuild -->
+</head>
+<body>
+<div id="outerdiv">
+  <div id="innerdiv">
+    <header class="clearfix">
+      <input id="inputfield" class="textinput" type="text">
+      <label id="snolabel"><input id="snocheck" type="checkbox"> New only</label>
+      <menu type="toolbar" role="toolbar">
+        <li>
+          <button type="button"><i class="icon ion-android-add-circle"></i></button>
+        </li>
+        <li>
+          <button type="button">
+                        <span class="badge-icon">
+                            <i class="icon ion-ios-email"></i>
+                            <span class="badge">0</span>
+                        </span>
+          </button>
+        </li>
+        <li>
+          <button type="button"><i class="icon ion-social-github"></i></button>
+        </li>
+        <li>
+          <button type="button"><i class="icon ion-ios-settings-strong"></i></button>
+        </li>
+      </menu>
+    </header>
+    <section id="section-repos" ng-controller="PopupController as popup">
+      <ul id="repo-listings">
+        <li id="{{repo.id}}" ng-repeat="repo in popup.repos">
+          <article class="repo-item">
+            <div class="upper-section">
+              <span class="stats">{{repo.lastUpdated}}</span>
+              <span class="title"><i class="icon ion-social-github"> </i>{{repo.name}} | {{repo.owner.login}}</span>
+              <span class="repo-lang">[ <i class="{{repo.language}}"></i> ]</span>
+            </div>
+            <section class="lower-section clearfix">
+              <span class="description">{{repo.description}}</span>
+                    <span class="actions-bar">
+                        <span><i class="icon ion-ios-folder-outline" data-action="open-repo"></i></span>
+                        <span><i class="icon {{star}}" data-action="star"></i></span>
+                        <span><i class="icon ion-fork-repo" data-action="fork"></i></span>
+                        <span><i class="icon ion-ios-cloud-download-outline" data-action="download"></i></span>
+                        <span><i class="icon ion-ios-trash-outline" data-action="delete"></i></span>
+                    </span>
+            </section>
+          </article>
+        </li>
+      </ul>
+    </section>
+  </div>
+</div>
+<!-- build:js scripts/vendor.js -->
+<!-- bower:js -->
+<!-- endbower -->
+<!-- endbuild -->
+
+<!-- build:js scripts/popup.js -->
+<script src="bower_components/angular/angular.js"></script>
+<script src="scripts/popup.js"></script>
+<!-- endbuild -->
+</body>
+</html>
