@@ -6,18 +6,33 @@
  */
 
 (function () {
-  'use strict';
+  "use strict";
 
   var popupModule;
 
   /**
    * @module
    */
-  popupModule = angular.module('popup', []);
+  popupModule = angular.module("popup", []).
+    filter("age", function () {
+      return function (input) {
+        var lastupdate,
+          age;
 
-  popupModule.controller('PopupController',
+        if (!input) {
+          throw new Error("Need to provide argument for the 'age' filter");
+        }
+
+        lastupdate = moment(input);
+        age = lastupdate.fromNow();
+
+        return age;
+      };
+    });
+
+  popupModule.controller("PopupController",
     [
-      '$scope',
+      "$scope",
       function ($scope) {
         chrome.runtime.getBackgroundPage(
           function (backgrondPageObject) {
@@ -30,7 +45,7 @@
             });
           });
 
-        // Listen for changes in repos
+        // Listen for changes in repos cache
         chrome.runtime.onMessage.addListener(
           function (request, sender, sendResponse) {
             $scope.$apply(function () {

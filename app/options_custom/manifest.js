@@ -1,22 +1,20 @@
-// SAMPLE
 this.manifest = {
-    "name": "Speedhub",
-    "icon": "../../../icons/icon19.png",
-    "settings": [
-        {
-            "tab": i18n.get("information"),
-            "group": i18n.get("general"),
-            "name": "personalKey",
-            "type": "text",
-            "label": i18n.get("personal-key"),
-            "text": i18n.get("key-placeholder")
-        },
-        {
-            "tab": i18n.get("information"),
-            "group": i18n.get("general"),
-            "name": "frequentRefresh",
-            "type": "checkbox",
-            "label": i18n.get("freq-refresh-text")
-        }
-    ]
+  "name": "Speedhub",
+  "icon": "../images/icon-38.png",
+  "settings": [
+    {
+      "tab": i18n.get("general"),
+      "name": "personalKey",
+      "type": "text",
+      "label": i18n.get("personal-key-label"),
+      "text": i18n.get("key-placeholder")
+    },
+    {
+      "tab": i18n.get("general"),
+      "name": "updateFrequency",
+      "type": "text",
+      "label": i18n.get("upd-freq-label"),
+      "text": i18n.get("upd-freq-placeholder")
+    }
+  ]
 };

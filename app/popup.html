@@ -43,7 +43,7 @@
         <li id="{{repo.id}}" ng-repeat="repo in repos | filter:query">
           <article class="repo-item">
             <div class="upper-section">
-              <span class="stats">{{repo.updated_at}}</span>
+              <span class="stats">{{repo.updated_at | age}}</span>
               <span class="title"><i class="icon ion-social-github"> </i>{{repo.name}} | {{repo.owner.login}}</span>
               <span class="repo-lang">[ <i class="">{{repo.language}}</i> ]</span>
             </div>
@@ -70,6 +70,7 @@
 
 <!-- build:js scripts/popup.js -->
 <script src="bower_components/angular/angular.js"></script>
+<script src="bower_components/moment/moment.js"></script>
 <script src="scripts/popup.js"></script>
 <!-- endbuild -->
 </body>

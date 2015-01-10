@@ -18,22 +18,22 @@ requirejs.config({
     lib: "lib",
     vendors: "../bower_components"
   },
-
+  
   //Shim config
   shim: {
     "vendors/underscore/underscore-min.js": {
       exports: "_"
     },
-
+    
     "lib/github": {
       deps: ["vendors/underscore/underscore-min"],
       exports: "Github"
     },
-
+    
     "vendors/moment/moment": {
       exports: "moment"
     },
-
+    
     "vendors/angular/angular.min": {
       exports: "angular"
     }
@@ -44,13 +44,31 @@ requirejs.config({
 define(["vendors/angular/angular.min", "util/chrome.storage", "util/chrome.tabs", "lib/github"],
   function (angular, chromeStorage, chromeTabs) {
     "use strict";
-
+    
     // Define the Global Object that will hold the extension functionality
     SPEEDHUB = {};
-
+    
     var getLocalRepos,
       getRepo,
       githubClient;
+
+    chromeStorage.get("store.settings.personalKey",
+      function (items) {
+        if (!items) {
+          // Show the options page to the user
+          chromeTabs.create({
+              active: true,
+              url: "options_custom/index.html"
+            },
+            null);
+        }
+
+        githubClient = new Github({
+          token: JSON.parse(items),
+          oauth: "oauth"
+        });
+      },
+      "local.storage");
 
     /**
      * Executes the callback with an array of repositories as the parameter.
@@ -63,7 +81,7 @@ define(["vendors/angular/angular.min", "util/chrome.storage", "util/chrome.tabs"
         },
         "chrome.local");
     };
-
+    
     /**
      * Passes the repository associated with the id to the callback function.
      * @param {number} id The id of the repository that is being retrieved.
@@ -78,38 +96,32 @@ define(["vendors/angular/angular.min", "util/chrome.storage", "util/chrome.tabs"
               return repo;
             }
           })[0];
-
+          
           callback(repo);
         },
         "chrome.local");
     };
-
+    
     // Event listeners
     chrome.runtime.onInstalled.addListener(function (details) {
       switch (details.reason) {
         case "install":
-          // Show the options page to the user
-          chromeTabs.create({
-              active: true,
-              url: "options_custom/index.html"
-            },
-            null);
+          // Set the alarms to execute recurrent tasks
+          chrome.alarms.create("getReposFromGithub", { delayInMinutes: 1, periodInMinutes: 1 });
           break;
       }
     });
-
+    
     chrome.storage.onChanged.addListener(function (changes, namespace) {
       if (namespace === "local" && changes.hasOwnProperty("localRepos")) {
         getLocalRepos(function (repos) {
           chrome.runtime.sendMessage({ repos: repos }, function () {
-            // Do nothing
           });
         });
       }
     });
-
-    window.addEventListener(
-      "storage",
+    
+    window.addEventListener("storage",
       function (e) {
         switch (e.key) {
           case "store.settings.personalKey":
@@ -117,25 +129,25 @@ define(["vendors/angular/angular.min", "util/chrome.storage", "util/chrome.tabs"
               token: JSON.parse(e.newValue),
               oauth: "oauth"
             });
-
+            
             githubClient.getUser().repos(
               function (err, items) {
                 if (err) {
                   throw new Error(err.message);
                 }
-
+                
                 chromeStorage.set(
                   { localRepos: items },
                   null,
                   "chrome.local"
                 );
               });
-
+            
             githubClient.getUser().notifications(function (err, notifications) {
                 if (err) {
                   throw new Error("Couldn't retrieve notifications");
                 }
-
+                
                 if (notifications && notifications.length !== 0) {
                   chrome.browserAction.setBadgeText({ text: notifications.length.toString(10) });
                 }
@@ -143,11 +155,17 @@ define(["vendors/angular/angular.min", "util/chrome.storage", "util/chrome.tabs"
             );
 
             break;
+          case "store.settings.updateFrequency":
+            chrome.alarms.get("getReposFromGithub", function (alarmObject) {
+              alarmObject.periodInMinutes = parseInt(JSON.parse(e.newValue), 10);
+              console.log("Update interval changed to " + alarmObject.periodInMinutes);
+            });
+            break;
           default:
             break;
         }
       });
-
+    
     // Listen to messages from the popup or other parts of the extension
     chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       switch (request.cmd) {
@@ -170,7 +188,31 @@ define(["vendors/angular/angular.min", "util/chrome.storage", "util/chrome.tabs"
           throw new Error("Unknown command: " + request.cmd);
       }
     });
-
+    
+    chrome.alarms.onAlarm.addListener(function (alarmObject) {
+      switch (alarmObject.name) {
+        case "getReposFromGithub":
+          githubClient.getUser().repos(
+            function (err, items) {
+              if (err) {
+                throw new Error(err.message);
+              }
+              
+              chromeStorage.set(
+                { localRepos: items },
+                function () {
+                  console.log("Repos updated");
+                },
+                "chrome.local"
+              );
+            });
+          break;
+        default:
+          // Do nothing here for now
+          break;
+      }
+    });
+    
     // Bind all functions to an object in the Global Space to make them accessible from the outside scripts
     // referencing the BackgroundPage object
     SPEEDHUB.getLocalRepos = getLocalRepos;
