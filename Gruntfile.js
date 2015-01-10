@@ -91,8 +91,7 @@ module.exports = function (grunt) {
 
     // Empties folders to start fresh
     clean: {
-      chrome: {
-      },
+      chrome: {},
       dist: {
         files: [{
           dot: true,
@@ -249,14 +248,12 @@ module.exports = function (grunt) {
 
     // Run some tasks in parallel to speed up build process
     concurrent: {
-      chrome: [
-      ],
+      chrome: [],
       dist: [
         'imagemin',
         'svgmin'
       ],
-      test: [
-      ]
+      test: []
     },
 
     // Auto buildnumber, exclude debug files. smart builds that event pages
@@ -280,7 +277,7 @@ module.exports = function (grunt) {
     compress: {
       dist: {
         options: {
-          archive: function() {
+          archive: function () {
             var manifest = grunt.file.readJSON('app/manifest.json');
             return 'package/Speedhub-' + manifest.version + '.zip';
           }
@@ -291,6 +288,25 @@ module.exports = function (grunt) {
           src: ['**'],
           dest: ''
         }]
+      }
+    },
+
+    requirejs: {
+      compile: {
+        options: {
+          baseUrl: 'app/scripts',
+          mainConfigFile: 'app/scripts/app.js',
+          name: '../scripts/app',
+          include: [
+            '../scripts/lib/almond'
+          ],
+          skipModuleInsertion: false,
+          out: 'app/scripts/app.build.js',
+          wrap: {
+            start: '(function(){',
+            end: 'require(["../scripts/app"], null, null, true);})();'
+          }
+        }
       }
     }
   });
@@ -327,4 +343,7 @@ module.exports = function (grunt) {
     'test',
     'build'
   ]);
+
+  // Minimizes and concatenate scripts loaded with RequireJS
+  grunt.loadNpmTasks('grunt-contrib-requirejs');
 };

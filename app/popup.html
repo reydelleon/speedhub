@@ -11,11 +11,11 @@
   <link href="styles/main.css" rel="stylesheet">
   <!-- endbuild -->
 </head>
-<body>
+<body ng-controller="PopupController as popup">
 <div id="outerdiv">
   <div id="innerdiv">
     <header class="clearfix">
-      <input id="inputfield" class="textinput" type="text">
+      <input id="inputfield" class="textinput" type="text" ng-model="query">
       <label id="snolabel"><input id="snocheck" type="checkbox"> New only</label>
       <menu type="toolbar" role="toolbar">
         <li>
@@ -23,10 +23,10 @@
         </li>
         <li>
           <button type="button">
-                        <span class="badge-icon">
-                            <i class="icon ion-ios-email"></i>
-                            <span class="badge">0</span>
-                        </span>
+              <span class="badge-icon">
+                  <i class="icon ion-ios-email"></i>
+                  <span class="badge">0</span>
+              </span>
           </button>
         </li>
         <li>
@@ -37,9 +37,9 @@
         </li>
       </menu>
     </header>
-    <section id="section-repos" ng-controller="PopupController as popup">
+    <section id="section-repos">
       <ul id="repo-listings">
-        <li id="{{repo.id}}" ng-repeat="repo in popup.repos">
+        <li id="{{repo.id}}" ng-repeat="repo in repos | filter:query">
           <article class="repo-item">
             <div class="upper-section">
               <span class="stats">{{repo.lastUpdated}}</span>

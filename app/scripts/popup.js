@@ -373,9 +373,32 @@ var repos = [
 ];
 
 (function () {
-  var popupModule = angular.module('popup', []);
+  var popupModule;
 
-  popupModule.controller('PopupController', function () {
-    this.repos = repos;
-  });
+  /**
+   * @module
+   */
+  popupModule = angular.module('popup', []);
+
+  /**
+   *
+   */
+  popupModule.controller('PopupController',
+    [
+      '$scope',
+      function ($scope) {
+        $scope.repos = repos;
+
+        chrome.runtime.getBackgroundPage(
+          function (backgrondPageObject) {
+            var SPEEDHUB = backgrondPageObject.SPEEDHUB;
+
+            SPEEDHUB.getLocalRepos(function (repos) {
+              $scope.repos = repos;
+              $scope.$digest();
+            });
+          });
+      }
+    ]
+  );
 }());
