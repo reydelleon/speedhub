@@ -7,6 +7,7 @@
   <!-- endbower -->
   <!-- endbuild -->
   <!-- build:css styles/main.css -->
+  <link href="fonts/ionicons/css/ionicons.min.css" rel="stylesheet">
   <link href="styles/normalize.min.css" rel="stylesheet">
   <link href="styles/main.css" rel="stylesheet">
   <!-- endbuild -->
@@ -42,15 +43,15 @@
         <li id="{{repo.id}}" ng-repeat="repo in repos | filter:query">
           <article class="repo-item">
             <div class="upper-section">
-              <span class="stats">{{repo.lastUpdated}}</span>
+              <span class="stats">{{repo.updated_at}}</span>
               <span class="title"><i class="icon ion-social-github"> </i>{{repo.name}} | {{repo.owner.login}}</span>
-              <span class="repo-lang">[ <i class="{{repo.language}}"></i> ]</span>
+              <span class="repo-lang">[ <i class="">{{repo.language}}</i> ]</span>
             </div>
             <section class="lower-section clearfix">
               <span class="description">{{repo.description}}</span>
                     <span class="actions-bar">
                         <span><i class="icon ion-ios-folder-outline" data-action="open-repo"></i></span>
-                        <span><i class="icon {{star}}" data-action="star"></i></span>
+                        <span><i class="icon ion-ios-star-outline" data-action="star"></i></span>
                         <span><i class="icon ion-fork-repo" data-action="fork"></i></span>
                         <span><i class="icon ion-ios-cloud-download-outline" data-action="download"></i></span>
                         <span><i class="icon ion-ios-trash-outline" data-action="delete"></i></span>

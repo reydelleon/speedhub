@@ -1,7 +1,7 @@
 /**
  * @module      app
  * @author      Reydel Leon Machado
- * @copyright   (c) 2014 Reydel Leon-Machado
+ * @copyright   (c) 2014 Reydel Leon Machado
  * @license     Licensed under MIT license
  */
 
@@ -85,53 +85,28 @@ define(["vendors/angular/angular.min", "util/chrome.storage", "util/chrome.tabs"
     };
 
     // Event listeners
-    chrome.runtime.onInstalled.addListener(
-      function (details) {
-        // Create dummy data to populate the local storage for testing purposes.
-        var dummyData = [
-          {
-            name: "speedhub-cross-browser",
-            description: "Provides easy access to basic Github operations and notifications in the browser toolbar",
-            username: "reydelleon",
-            language: "CSS",
-            age: "20 Days"
-          },
-          {
-            name: "advanced-magento-tax-report",
-            description: "Adds a tax report aggregated by cities/states (using a grid) in Magento",
-            username: "reydelleon",
-            language: "JavaScript",
-            age: "last month"
-          }
-        ];
+    chrome.runtime.onInstalled.addListener(function (details) {
+      switch (details.reason) {
+        case "install":
+          // Show the options page to the user
+          chromeTabs.create({
+              active: true,
+              url: "options_custom/index.html"
+            },
+            null);
+          break;
+      }
+    });
 
-        switch (details.reason) {
-          case "install":
-            // Show the options page to the user
-            chromeTabs.create({
-                active: true,
-                url: "options_custom/index.html"
-              },
-              null);
-            break;
-        }
-      });
-
-    chrome.storage.onChanged.addListener(
-      function (changes, namespace) {
-        var key,
-          storageChange;
-
-        for (key in changes) {
-          storageChange = changes[key];
-          console.log('Storage key "%s" in namespace "%s" changed. ' +
-            'Old value was "%s", new value is "%s".',
-            key,
-            namespace,
-            storageChange.oldValue,
-            storageChange.newValue);
-        }
-      });
+    chrome.storage.onChanged.addListener(function (changes, namespace) {
+      if (namespace === "local" && changes.hasOwnProperty("localRepos")) {
+        getLocalRepos(function (repos) {
+          chrome.runtime.sendMessage({ repos: repos }, function () {
+            // Do nothing
+          });
+        });
+      }
+    });
 
     window.addEventListener(
       "storage",
@@ -156,8 +131,7 @@ define(["vendors/angular/angular.min", "util/chrome.storage", "util/chrome.tabs"
                 );
               });
 
-            githubClient.getUser().notifications(
-              function (err, notifications) {
+            githubClient.getUser().notifications(function (err, notifications) {
                 if (err) {
                   throw new Error("Couldn't retrieve notifications");
                 }
@@ -175,28 +149,27 @@ define(["vendors/angular/angular.min", "util/chrome.storage", "util/chrome.tabs"
       });
 
     // Listen to messages from the popup or other parts of the extension
-    chrome.runtime.onMessage.addListener(
-      function (request, sender, sendResponse) {
-        switch (request.cmd) {
-          case "update_cache":
-            //updateView();
-            sendResponse({ 200: "OK" });
-            break;
-          case "open-repo":
-            getRepo(request.id, function (repo) {
-              chromeTabs.create({ url: repo.html_url });
-            });
-            break;
-          case "download":
-            getRepo(request.id, function (repo) {
-              var url = repo.html_url + "/archive/master.zip";
-              chromeTabs.create({ url: url });
-            });
-            break;
-          default:
-            throw new Error("Unknown command: " + request.cmd);
-        }
-      });
+    chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+      switch (request.cmd) {
+        case "update_cache":
+          //updateView();
+          sendResponse({ 200: "OK" });
+          break;
+        case "open-repo":
+          getRepo(request.id, function (repo) {
+            chromeTabs.create({ url: repo.html_url });
+          });
+          break;
+        case "download":
+          getRepo(request.id, function (repo) {
+            var url = repo.html_url + "/archive/master.zip";
+            chromeTabs.create({ url: url });
+          });
+          break;
+        default:
+          throw new Error("Unknown command: " + request.cmd);
+      }
+    });
 
     // Bind all functions to an object in the Global Space to make them accessible from the outside scripts
     // referencing the BackgroundPage object
